@@ -162,6 +162,9 @@
           <div><span class="stat-title">Sentence Count:</span> <span id="sentenceCount">0</span></div>
           <div><span class="stat-title">Paragraph Count:</span> <span id="paragraphCount">0</span></div>
           <div><span class="stat-title">Estimated Reading Time (minutes):</span> <span id="readingTime">0</span></div>
+          <div><span class="stat-title">MC-1:</span> <span id="mc1">N/A</span></div>
+          <div><span class="stat-title">MC-2:</span> <span id="mc2">N/A</span></div>
+          <div><span class="stat-title">MC-3:</span> <span id="mc3">N/A</span></div>
         </div>
       </div>
     </div>
@@ -186,6 +189,9 @@
           <div><span class="stat-title">Sentence Count:</span> <span id="sentenceCount">0</span></div>
           <div><span class="stat-title">Paragraph Count:</span> <span id="paragraphCount">0</span></div>
           <div><span class="stat-title">Estimated Reading Time (minutes):</span> <span id="readingTime">0</span></div>
+          <div><span class="stat-title">MC-1:</span> <span id="mc1">N/A</span></div>
+          <div><span class="stat-title">MC-2:</span> <span id="mc2">N/A</span></div>
+          <div><span class="stat-title">MC-3:</span> <span id="mc3">N/A</span></div>
         </div>
       </div>
     </div>
@@ -195,6 +201,7 @@
     function showTab(tabName) {
       const tabs = document.querySelectorAll('.tab');
       const contents = document.querySelectorAll('.tab-content');
+      const sidebarStats = document.querySelectorAll('.stats');
 
       tabs.forEach(tab => {
         tab.classList.remove('active');
@@ -209,6 +216,23 @@
           content.classList.add('active');
         }
       });
+
+      // Reset stats when switching tabs
+      sidebarStats.forEach(sidebar => {
+        sidebar.querySelector('#wordCount').textContent = '0';
+        sidebar.querySelector('#charCountWithSpaces').textContent = '0';
+        sidebar.querySelector('#charCountWithoutSpaces').textContent = '0';
+        sidebar.querySelector('#sentenceCount').textContent = '0';
+        sidebar.querySelector('#paragraphCount').textContent = '0';
+        sidebar.querySelector('#readingTime').textContent = '0';
+        sidebar.querySelector('#mc1').textContent = 'N/A';
+        sidebar.querySelector('#mc2').textContent = 'N/A';
+        sidebar.querySelector('#mc3').textContent = 'N/A';
+      });
+
+      // Check the content of the active textarea to update stats
+      const activeTextareaId = tabName === 'organize' ? 'inputText' : 'editText';
+      updateStats(activeTextareaId);
     }
 
     function alphabetizeList() {
@@ -236,6 +260,38 @@
       document.querySelectorAll('#sentenceCount').forEach(el => el.textContent = input.split(/[.!?]+/).filter(s => s.trim()).length);
       document.querySelectorAll('#paragraphCount').forEach(el => el.textContent = input.split(/\n+/).filter(p => p.trim()).length);
       document.querySelectorAll('#readingTime').forEach(el => el.textContent = Math.ceil(wordCount / 200));
+
+      const words = input.toLowerCase().match(/\b\w+\b/g) || [];
+
+      const mc1 = getMostCommonNGram(words, 1);
+      const mc2 = getMostCommonNGram(words, 2);
+      const mc3 = getMostCommonNGram(words, 3);
+
+      document.querySelectorAll('#mc1').forEach(el => el.textContent = mc1);
+      document.querySelectorAll('#mc2').forEach(el => el.textContent = mc2);
+      document.querySelectorAll('#mc3').forEach(el => el.textContent = mc3);
+    }
+
+    function getMostCommonNGram(words, n) {
+      const ngramCounts = {};
+
+      for (let i = 0; i <= words.length - n; i++) {
+        const ngram = words.slice(i, i + n).join(' ');
+        ngramCounts[ngram] = (ngramCounts[ngram] || 0) + 1;
+      }
+
+      let mostCommon = 'N/A';
+      let maxCount = 0;
+      const total = Object.values(ngramCounts).reduce((a, b) => a + b, 0);
+
+      for (const [phrase, count] of Object.entries(ngramCounts)) {
+        if (count > maxCount) {
+          maxCount = count;
+          mostCommon = `${phrase} (${count} times, ${((count / total) * 100).toFixed(2)}%)`;
+        }
+      }
+
+      return mostCommon;
     }
 
     function toLowerCase() {
