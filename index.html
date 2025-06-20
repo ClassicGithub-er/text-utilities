@@ -111,6 +111,7 @@
       border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      position: relative;
     }
 
     button:hover {
@@ -178,6 +179,7 @@
           <button onclick="toLowerCase()">aa</button>
           <button onclick="toUpperCase()">AA</button>
           <button onclick="capitalizeWords()">Aa</button>
+          <button onclick="fixRandomCase()">AaAa</button> <!-- New Fix button for random case -->
         </div>
       </div>
 
@@ -230,25 +232,30 @@
         sidebar.querySelector('#mc3').textContent = 'N/A';
       });
 
-      // Check the content of the active textarea to update stats
       const activeTextareaId = tabName === 'organize' ? 'inputText' : 'editText';
       updateStats(activeTextareaId);
     }
 
-    function alphabetizeList() {
-      const input = document.getElementById('inputText').value;
-      const items = input.split('\n').map(item => item.trim()).filter(item => item !== '');
-      items.sort((a, b) => a.localeCompare(b));
-      document.getElementById('inputText').value = items.join('\n');
-      updateStats('inputText');
-    }
+    // Function to fix the case: random uppercase and lowercase
+    function fixRandomCase() {
+      const textarea = document.getElementById('editText');
+      const text = textarea.value;
+      let result = '';
 
-    function organizeByLength() {
-      const input = document.getElementById('inputText').value;
-      const items = input.split('\n').map(item => item.trim()).filter(item => item !== '');
-      items.sort((a, b) => a.length - b.length);
-      document.getElementById('inputText').value = items.join('\n');
-      updateStats('inputText');
+      for (let i = 0; i < text.length; i++) {
+        if (text[i].match(/[a-zA-Z]/)) {  // Only change alphabetic characters
+          if (Math.random() > 0.5) {
+            result += text[i].toUpperCase();
+          } else {
+            result += text[i].toLowerCase();
+          }
+        } else {
+          result += text[i];  // Keep non-alphabetic characters as is
+        }
+      }
+
+      textarea.value = result;
+      updateStats('editText');
     }
 
     function updateStats(textareaId) {
@@ -292,24 +299,6 @@
       }
 
       return mostCommon;
-    }
-
-    function toLowerCase() {
-      const textarea = document.getElementById('editText');
-      textarea.value = textarea.value.toLowerCase();
-      updateStats('editText');
-    }
-
-    function toUpperCase() {
-      const textarea = document.getElementById('editText');
-      textarea.value = textarea.value.toUpperCase();
-      updateStats('editText');
-    }
-
-    function capitalizeWords() {
-      const textarea = document.getElementById('editText');
-      textarea.value = textarea.value.replace(/\b\w+/g, word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-      updateStats('editText');
     }
   </script>
 
